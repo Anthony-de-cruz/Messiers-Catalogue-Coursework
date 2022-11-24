@@ -22,5 +22,6 @@ public class MessierProgram {
         System.out.println("---");
 
         System.out.println(obj1.compareTo(obj2));
+
     }
 }

@@ -1,5 +1,7 @@
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.text.DecimalFormat;
 import java.lang.Math;
 
 public class MessierObject implements Comparable<MessierObject> {
@@ -72,7 +74,6 @@ public class MessierObject implements Comparable<MessierObject> {
         this.apparentMagnitude = apparentMagnitude;
         this.rightAscension = rightAscension;
         this.declination = declination;
-
     }
 
     /**
@@ -129,25 +130,63 @@ public class MessierObject implements Comparable<MessierObject> {
      * @param rightAscension The right ascension as "(hours)h (minutes)m (seconds)s"
      * @return The right ascension in radians
      */
-    private static double rightAscensionToRadians(String rightAscension) {
+    private static double rightAscensionToRadians(String rightAscensionStr) {
 
-        ArrayList<Double> values = measurementToDoubles(rightAscension);
+        ArrayList<Double> values = measurementToDoubles(rightAscensionStr);
 
-        return Math.toRadians(values.get(0) + (values.get(1) / 60) + (values.get(2) / 3600));
+        return Math.toRadians((values.get(0) + (values.get(1) / 60) + (values.get(2) / 3600)) * 15);
+    }
+
+    /**
+     * Converts right ascension to a string.
+     * 
+     * @param rightAscensionRad The right ascension in radians
+     * @return The right ascension as "(hours)h (minutes)m (seconds)s"
+     */
+    private static String rightAscensionToTime(double rightAscensionRad) {
+
+        double time = Math.toDegrees(rightAscensionRad) / 15;
+
+        double hours = Math.floor(time);
+        double minutes = Math.floor((time - hours) * 60);
+        double seconds = (((time - hours) * 60) - minutes) * 60.0;
+
+        DecimalFormat decimalFormat = new DecimalFormat("#.0000");
+
+        return ((int) hours + "h " + (int) minutes + "m " + decimalFormat.format(seconds) + "s");
     }
 
     /**
      * Converts a string of declination into radians.
      * 
-     * @param declination The given declination as "(degrees)° (arcminutes)'
-     *                    (arcseconds)""
+     * @param declinationStr The declination as "(degrees)° (arcMinutes)'
+     *                       (arcSeconds)""
      * @return The declination in radians
      */
-    private static double declinationToRadians(String declination) {
+    private static double declinationToRadians(String declinationStr) {
 
-        ArrayList<Double> values = measurementToDoubles(declination);
+        ArrayList<Double> values = measurementToDoubles(declinationStr);
 
         return Math.toRadians(values.get(0) + (values.get(1) / 60) + (values.get(2) / 3600));
+    }
+
+    /**
+     * Converts declination in radians to a string.
+     * 
+     * @param declinationRad The declination in radians
+     * @return The declination as "(degrees)° (arcMinutes)' (arcSeconds)""
+     */
+    private static String declinationToAngle(double declinationRad) {
+
+        double angle = Math.toDegrees(declinationRad);
+
+        double degrees = Math.floor(angle);
+        double arcMinutes = Math.floor((angle - degrees) * 60);
+        double arcSeconds = (((angle - degrees) * 60) - arcMinutes) * 60.0;
+
+        DecimalFormat decimalFormat = new DecimalFormat("#.0000");
+
+        return ((int) degrees + "° " + (int) arcMinutes + "' " + decimalFormat.format(arcSeconds) + "\"");
     }
 
     @Override
@@ -162,31 +201,34 @@ public class MessierObject implements Comparable<MessierObject> {
         return Double.compare(this.getApparentMagnitude(), object.getApparentMagnitude());
     }
 
+    @Override
     /**
-     * Method to generate a string of all fields in the format of the table.
-     * 
-     * @return A string containing all fields in the original format
+     * @return
      */
     public String toString() {
 
-        //todo Might hardcode this instead so that the class can have more fields
+        // I think that there is enough changes to the final result to justify
+        // hardcoding this instead of fetching a list of all fields, iterating over them
+        // and appending them to a string. Perhaps a sign of poor implementation,
+        // however.
 
-        Field[] fields = this.getClass().getDeclaredFields();
         String properties = "";
+        properties += this.messierNumber;
+        properties += ", " + this.ngcicNumber;
+        properties += ", " + this.commonName;
+        properties += ", " + this.type;
 
-        for (Field field : fields) {
-            try {
-                if (properties != "") {
-                    properties += ", " + field.get(this);
-
-                } else {
-                    properties += field.get(this);
-                }
-
-            } catch (IllegalAccessException exception) {
-                exception.printStackTrace();
-            }
+        if (this.getDistanceRange().size() == 2) {
+            properties += ", " + Double.toString(this.getLowestDistance()) + "-"
+                    + Double.toString(this.getHighestDistance());
+        } else {
+            properties += ", " + Double.toString(this.getLowestDistance());
         }
+
+        properties += ", " + this.constellation;
+        properties += ", " + this.apparentMagnitude;
+        properties += ", " + rightAscensionToTime(this.rightAscension);
+        properties += ", " + declinationToAngle(this.declination);
 
         return properties;
     }
@@ -227,7 +269,13 @@ public class MessierObject implements Comparable<MessierObject> {
     }
 
     public double getHighestDistance() {
-        return this.distanceRange.get(1);
+
+        if (this.distanceRange.size() == 2) {
+            return this.distanceRange.get(1);
+        } else {
+            return this.distanceRange.get(0);
+        }
+
     }
 
     public String getConstellation() {
