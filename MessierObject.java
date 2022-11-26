@@ -6,7 +6,7 @@ public class MessierObject implements Comparable<MessierObject> {
 
     private String messierNumber;
     private String ngcicNumber;
-    private String commonName;
+    private String commonName; // To be stored as Arr
     private String type;
     private ArrayList<Double> distanceRange;
     private String constellation;
@@ -17,12 +17,12 @@ public class MessierObject implements Comparable<MessierObject> {
     /**
      * Constructor with table entry string.
      * 
-     * @param entry table entry string
+     * @param entry Table entry string
      */
     public MessierObject(String entry) {
 
         try {
-            String[] values = parseEntry(entry);
+            String[] values = parseEntryQuotationCSV(entry);
 
             this.messierNumber = values[0];
             this.ngcicNumber = values[1];
@@ -75,32 +75,56 @@ public class MessierObject implements Comparable<MessierObject> {
     }
 
     /**
-     * Internal method to parse through the given table entry, picking out fields
+     * Parse through the given table entry, picking out fields,
+     * leaving any delimeters wrapped by double quotation marks.
+     * Specifically for quotation aware CSV.
      * 
-     * @param entry The table entry line
+     * @param entry     The table entry line
+     * @param delimeter The delimeter character
      * @return The fields in string array
      */
-    private static String[] parseEntry(String entry) throws InvalidEntryException {
+    private static String[] parseEntryQuotationCSV(String entry) throws InvalidEntryException {
 
-        if (entry.indexOf(",") == -1) {
+        if (entry.indexOf(',') == -1) {
             throw new InvalidEntryException("Invalid string format.");
         }
 
-        String[] values = entry.split(",");
+        // Parser to iterates over every character, appending the field when it
+        // encounters a comma not wrapped by a double quote. Whilst this could be done
+        // with regex I felt that this implementation, whilst probably slower, is more
+        // readable (and actually works) than the cryptic haze that is my bad attempt at
+        // regex.
+        // ,(?=([^\"]*\"[^\"]*\")*[^\"]*$)
+        // ,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)
+        // (["'])(?:(?=(\\?))\2.)*?\1
 
-        for (int i = 0; i < values.length; i++) {
-            values[i] = values[i].trim();
+        int prevPosition = 0;
+        ArrayList<String> valuesList = new ArrayList<String>();
+        boolean inQuotes = false;
+
+        for (int position = 0; position < entry.length(); position++) {
+
+            if (entry.charAt(position) == '\"') {
+                inQuotes = !inQuotes;
+
+            } else if (entry.charAt(position) == ',' && !inQuotes) {
+                valuesList.add(entry.substring(prevPosition, position));
+                prevPosition = position + 2;
+            }
         }
 
-        if (values.length != 9) {
-            throw new InvalidEntryException("Incorrect number of fields.");
+        valuesList.add(entry.substring(prevPosition));
+
+        String[] valuesArray = valuesList.toArray(new String[valuesList.size()]);
+
+        if (valuesArray.length != 9) {
+            throw new InvalidEntryException("Invalid number of fields. Expected 9, got: " + valuesArray.length);
         }
 
-        return values;
-
-        // entry = entry.replace('"', '\u0000');
-        // entry = entry.replace('\s', '\u0000');
+        return valuesArray;
     }
+
+
 
     /**
      * Converts a string with a series of measurements into an ArrayList of doubles.
@@ -108,17 +132,15 @@ public class MessierObject implements Comparable<MessierObject> {
      * @param measurement The measurement as "(value)(unit) (value)(unit)..."
      * @return An ArrayList of doubles
      */
-    private static ArrayList<Double> measurementToDoubles(String measurement) {
+    private static Double[] measurementToDoubles(String measurement) {
 
-        // Convert the string into an arraylist of doubles to be worked with
+        measurement = measurement.replaceAll("[hms°\'\"]", "\u0000");
         String[] strings = measurement.split(" ");
-        ArrayList<Double> values = new ArrayList<Double>();
+        Double[] values = new Double[strings.length];
 
-        for (String value : strings) {
-            value = value.substring(0, value.length() - 1);
-            values.add(Double.parseDouble(value));
+        for (int i = 0; i < strings.length; i++) {
+            values[i] = Double.parseDouble(strings[i]);
         }
-
         return values;
     }
 
@@ -130,9 +152,9 @@ public class MessierObject implements Comparable<MessierObject> {
      */
     private static double rightAscensionToRadians(String rightAscensionStr) {
 
-        ArrayList<Double> values = measurementToDoubles(rightAscensionStr);
+        Double[] values = measurementToDoubles(rightAscensionStr);
 
-        return Math.toRadians((values.get(0) + (values.get(1) / 60) + (values.get(2) / 3600)) * 15);
+        return Math.toRadians((values[0] + (values[1] / 60) + (values[2] / 3600)) * 15);
     }
 
     /**
@@ -163,9 +185,9 @@ public class MessierObject implements Comparable<MessierObject> {
      */
     private static double declinationToRadians(String declinationStr) {
 
-        ArrayList<Double> values = measurementToDoubles(declinationStr);
+        Double[] values = measurementToDoubles(declinationStr);
 
-        return Math.toRadians(values.get(0) + (values.get(1) / 60) + (values.get(2) / 3600));
+        return Math.toRadians(values[0] + (values[1] / 60) + (values[2] / 3600));
     }
 
     /**
@@ -207,8 +229,8 @@ public class MessierObject implements Comparable<MessierObject> {
 
         // I think that there is enough changes to the final result to justify
         // hardcoding this instead of fetching a list of all fields, iterating over them
-        // and appending them to a string. Perhaps a sign of poor implementation,
-        // however.
+        // and appending them to a string. However, this is perhaps a sign of poor
+        // implementation.
 
         String properties = "";
         properties += this.messierNumber;
@@ -273,7 +295,6 @@ public class MessierObject implements Comparable<MessierObject> {
         } else {
             return this.distanceRange.get(0);
         }
-
     }
 
     public String getConstellation() {
@@ -284,11 +305,19 @@ public class MessierObject implements Comparable<MessierObject> {
         return this.apparentMagnitude;
     }
 
-    public double getRightAscension() {
+    public double getRightAscensionRadians() {
         return this.rightAscension;
     }
 
-    public double getDeclination() {
+    public String getRightAscensionString() {
+        return rightAscensionToTime(this.rightAscension);
+    }
+
+    public double getDeclinationRadians() {
         return this.declination;
+    }
+
+    public String getDeclinationString() {
+        return declinationToAngle(this.declination);
     }
 }
