@@ -1,10 +1,11 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 public class MessierCatalogue {
 
-    private ArrayList<MessierObject> messierObjects;
+    private List<MessierObject> messierObjects;
 
     /**
      * Constructor for an empty set of Messier Objects.
@@ -21,7 +22,7 @@ public class MessierCatalogue {
      */
     public MessierCatalogue(MessierObject[] messierObjects) {
 
-        this.messierObjects = (ArrayList<MessierObject>) Arrays.asList(messierObjects);
+        this.messierObjects = new ArrayList<>(Arrays.asList(messierObjects));
     }
 
     /* ---------------------------- Mutating the set ---------------------------- */
@@ -87,7 +88,14 @@ public class MessierCatalogue {
      * @return
      */
     public String toString() {
-        return new String();
+
+        String catalogue = "";
+
+        for (MessierObject object : this.messierObjects) {
+            catalogue += "\n" + object.toString();
+        }
+
+        return catalogue;
     }
 
     /**

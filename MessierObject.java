@@ -1,4 +1,6 @@
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.text.DecimalFormat;
 import java.lang.Math;
 
@@ -6,13 +8,15 @@ public class MessierObject implements Comparable<MessierObject> {
 
     private String messierNumber;
     private String ngcicNumber;
-    private String commonName; // To be stored as Arr
+    private List<String> commonNames;
     private String type;
-    private ArrayList<Double> distanceRange;
+    private List<Double> distanceRange;
     private String constellation;
     private double apparentMagnitude;
     private double rightAscension; // Stored as radians
     private double declination; // Stored as radians
+
+    private static int fieldCount = 9;
 
     /**
      * Constructor with table entry string.
@@ -22,11 +26,11 @@ public class MessierObject implements Comparable<MessierObject> {
     public MessierObject(String entry) {
 
         try {
-            String[] values = parseEntryQuotationCSV(entry);
+            String[] values = parseEntry(entry);
 
             this.messierNumber = values[0];
             this.ngcicNumber = values[1];
-            this.commonName = values[2];
+            this.commonNames = Arrays.asList(parseField(values[2]));
             this.type = values[3];
 
             String[] distances = values[4].split("-");
@@ -43,7 +47,6 @@ public class MessierObject implements Comparable<MessierObject> {
         } catch (InvalidEntryException exception) {
             System.out.println(exception.toString());
         }
-
     }
 
     /**
@@ -51,7 +54,7 @@ public class MessierObject implements Comparable<MessierObject> {
      * 
      * @param messierNumber
      * @param ngcicNumber
-     * @param commonName
+     * @param commonNames
      * @param type
      * @param distance
      * @param constellation
@@ -59,13 +62,13 @@ public class MessierObject implements Comparable<MessierObject> {
      * @param rightAscension    Stored as radians
      * @param declination
      */
-    public MessierObject(String messierNumber, String ngcicNumber, String commonName, String type,
+    public MessierObject(String messierNumber, String ngcicNumber, List<String> commonNames, String type,
             ArrayList<Double> distanceRange,
             String constellation, double apparentMagnitude, double rightAscension, double declination) {
 
         this.messierNumber = messierNumber;
         this.ngcicNumber = ngcicNumber;
-        this.commonName = commonName;
+        this.commonNames = commonNames;
         this.type = type;
         this.distanceRange = distanceRange;
         this.constellation = constellation;
@@ -83,11 +86,7 @@ public class MessierObject implements Comparable<MessierObject> {
      * @param delimeter The delimeter character
      * @return The fields in string array
      */
-    private static String[] parseEntryQuotationCSV(String entry) throws InvalidEntryException {
-
-        if (entry.indexOf(',') == -1) {
-            throw new InvalidEntryException("Invalid string format.");
-        }
+    private static String[] parseEntry(String entry) throws InvalidEntryException {
 
         // Parser to iterates over every character, appending the field when it
         // encounters a comma not wrapped by a double quote. Whilst this could be done
@@ -99,7 +98,7 @@ public class MessierObject implements Comparable<MessierObject> {
         // (["'])(?:(?=(\\?))\2.)*?\1
 
         int prevPosition = 0;
-        ArrayList<String> valuesList = new ArrayList<String>();
+        List<String> valuesList = new ArrayList<String>();
         boolean inQuotes = false;
 
         for (int position = 0; position < entry.length(); position++) {
@@ -117,14 +116,32 @@ public class MessierObject implements Comparable<MessierObject> {
 
         String[] valuesArray = valuesList.toArray(new String[valuesList.size()]);
 
-        if (valuesArray.length != 9) {
-            throw new InvalidEntryException("Invalid number of fields. Expected 9, got: " + valuesArray.length);
+        if (valuesArray.length != fieldCount) {
+            throw new InvalidEntryException(
+                    "Invalid number of fields. Expected " + fieldCount + ", got: " + valuesArray.length);
         }
 
         return valuesArray;
     }
 
+    /**
+     * Parse through the given field.
+     * 
+     * @param field Field string to be parsed.
+     * @return String array containing the values.
+     */
+    private static String[] parseField(String field) {
 
+        field = field.replace('"', '\u0000');
+
+        String[] values = field.split("(, or )|,");
+
+        for (int i = 0; i < values.length; i ++) {
+            values[i] = values[i].trim();
+        }
+
+        return values;
+    }
 
     /**
      * Converts a string with a series of measurements into an ArrayList of doubles.
@@ -221,9 +238,39 @@ public class MessierObject implements Comparable<MessierObject> {
         return Double.compare(this.getApparentMagnitude(), object.getApparentMagnitude());
     }
 
-    @Override
     /**
-     * @return
+     * Take a list of strings and turns it into a string.
+     *
+     * @param list The list to become a string
+     * @return The string
+     */
+    private String stringListToString(List<String> list) {
+
+        String string = "\"";
+
+        for (int i = 0; i < list.size(); i++) {
+
+            if (i == 0) {
+                string += list.get(i);
+
+            } else if (i == list.size() - 1) {
+                string += ", or " + list.get(i);
+
+            } else {
+                string += ", " + list.get(i);
+            }
+        }
+        string += "\"";
+
+        return string;
+    }
+
+    // @Override
+    /**
+     * Creates and returns a string of all of the objects fields in the database
+     * format.
+     * 
+     * @return The object as a string.
      */
     public String toString() {
 
@@ -235,7 +282,7 @@ public class MessierObject implements Comparable<MessierObject> {
         String properties = "";
         properties += this.messierNumber;
         properties += ", " + this.ngcicNumber;
-        properties += ", " + this.commonName;
+        properties += ", " + stringListToString(this.commonNames);
         properties += ", " + this.type;
 
         if (this.getDistanceRange().size() == 2) {
@@ -263,15 +310,19 @@ public class MessierObject implements Comparable<MessierObject> {
         return this.ngcicNumber.replace('"', '\u0000');
     }
 
-    public String getCommonName() {
-        return this.commonName.replace('"', '\u0000');
+    public List<String> getCommonNames() {
+        return this.commonNames;
+    }
+
+    public String commonNamesToString() {
+        return stringListToString(this.commonNames);
     }
 
     public String getType() {
         return this.type;
     }
 
-    public ArrayList<Double> getDistanceRange() {
+    public List<Double> getDistanceRange() {
         return this.distanceRange;
     }
 
