@@ -1,7 +1,13 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
+
+/** To do list
+ * - Make getters and setters
+ * - Create test case
+ */
 
 public class MessierCatalogue {
 
@@ -74,18 +80,25 @@ public class MessierCatalogue {
     }
 
     /**
-     * 
+     * Empty the list of MessierObjects.
      */
-    public void sort() {
-
+    public void removeAll() {
+        this.messierObjects = new ArrayList<MessierObject>();
     }
 
-    /* ------------------------------ Getting data ------------------------------ */
-
-    @Override
     /**
+     * Sort the Messier Object list based on it's comparator (apparent magnitude).
+     */
+    public void sort() {
+        Collections.sort(this.messierObjects);
+    }
+
+    /* ------------------------------ Getting Data ------------------------------ */
+
+    /**
+     * Create a string containing the Messier Objects in the database format.
      * 
-     * @return
+     * @return The string
      */
     public String toString() {
 
@@ -105,5 +118,24 @@ public class MessierCatalogue {
      */
     public int size() {
         return this.messierObjects.size();
+    }
+
+    /**
+     * See if list is empty.
+     * 
+     * @return Whether or not it is empty
+     */
+    public boolean isEmpty() {
+        return this.messierObjects.isEmpty();
+    }
+
+    /* --------------------------- Getters and Setters -------------------------- */
+
+    public List<MessierObject> getList() {
+        return this.messierObjects;
+    }
+
+    public void setList(List<MessierObject> list) {
+        this.messierObjects = list;
     }
 }

@@ -23,7 +23,7 @@ public class MessierObject implements Comparable<MessierObject> {
      * 
      * @param entry Table entry string
      */
-    public MessierObject(String entry) {
+    public MessierObject(String entry) throws InvalidEntryException {
 
         try {
             String[] values = parseEntry(entry);
@@ -45,7 +45,7 @@ public class MessierObject implements Comparable<MessierObject> {
             this.declination = declinationToRadians(values[8]);
 
         } catch (InvalidEntryException exception) {
-            System.out.println(exception.toString());
+            throw exception;
         }
     }
 
@@ -134,7 +134,7 @@ public class MessierObject implements Comparable<MessierObject> {
 
         field = field.replace('"', '\u0000');
 
-        String[] values = field.split("(, or )|,");
+        String[] values = field.split("( or )|(, or )|,");
 
         for (int i = 0; i < values.length; i ++) {
             values[i] = values[i].trim();
@@ -226,18 +226,6 @@ public class MessierObject implements Comparable<MessierObject> {
         return ((int) degrees + "° " + (int) arcMinutes + "' " + decimalFormat.format(arcSeconds) + "\"");
     }
 
-    @Override
-    /**
-     * Compares apparent magnitude.
-     * 
-     * @param object MessierObject to be compared
-     * @return Comparison integer
-     */
-    public int compareTo(MessierObject object) {
-
-        return Double.compare(this.getApparentMagnitude(), object.getApparentMagnitude());
-    }
-
     /**
      * Take a list of strings and turns it into a string.
      *
@@ -253,9 +241,12 @@ public class MessierObject implements Comparable<MessierObject> {
             if (i == 0) {
                 string += list.get(i);
 
-            } else if (i == list.size() - 1) {
+            } else if (i == list.size() - 1 && list.size() != 2) {
                 string += ", or " + list.get(i);
 
+            } else if (i == list.size() - 1 && list.size() == 2) {
+                string += " or " + list.get(i);
+            
             } else {
                 string += ", " + list.get(i);
             }
@@ -265,7 +256,6 @@ public class MessierObject implements Comparable<MessierObject> {
         return string;
     }
 
-    // @Override
     /**
      * Creates and returns a string of all of the objects fields in the database
      * format.
@@ -298,6 +288,18 @@ public class MessierObject implements Comparable<MessierObject> {
         properties += ", " + declinationToAngle(this.declination);
 
         return properties;
+    }
+
+    @Override
+    /**
+     * Compares apparent magnitude.
+     * 
+     * @param object MessierObject to be compared
+     * @return Comparison integer
+     */
+    public int compareTo(MessierObject object) {
+
+        return Double.compare(this.getApparentMagnitude(), object.getApparentMagnitude());
     }
 
     /* --------------------------- Getters and Setters -------------------------- */
