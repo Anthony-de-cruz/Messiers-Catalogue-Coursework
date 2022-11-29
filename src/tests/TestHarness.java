@@ -24,7 +24,7 @@ public class TestHarness {
             System.out.println(demo3);
             System.out.println(obj1.toString());
             System.out.println(obj1.getNgcicNumber());
-            System.out.println(obj1.getDeclinationString());
+            System.out.println(obj1.getDeclinationAngle());
 
             System.out.println("\n--- Obj2 ---");
 
@@ -32,7 +32,7 @@ public class TestHarness {
             System.out.println(demo4);
             System.out.println(obj2.toString());
             System.out.println(obj2.getMeanDistance());
-            System.out.println(obj2.getRightAscensionString());
+            System.out.println(obj2.getRightAscensionTime());
 
             System.out.println("\n--- Comparison ---");
 
@@ -71,6 +71,7 @@ public class TestHarness {
                 "M1, \"NGC 1952\", \"Crab Nebula\", Supernova remnant, 4.9-8.1, Taurus, 8.4, 5h 34m 31.9400s, 22° 0' 52.2000\", hello",
                 "M1, \"NGC 1952\", \"Crab \"Nebula\", Supernova r,emnant, 4.9-8.1, 8.4, 5h 34m 31.9400s, 22° 0' 52.2000\"",
                 "M1, \"NGC 1952\", \"Crab Nebula\", Supernova remnant, 4.9-8.1, Taurus, 8.4, 5h 34m 31.9400s, 22° 0' 52.2000\"",
+                "M2a, \"NGC 7089\", \"-\", Globular cluster, 33.0, Aquarius, 6.5, 21h 33m 27.0200s, 0° 49' 23.7000\"",
         };
 
         // Valid test data

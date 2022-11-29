@@ -28,7 +28,9 @@ public class MessierProgram {
 
         // todo Create catalogue
 
-        return new MessierCatalogue();
+        MessierCatalogue catalogue = new MessierCatalogue();
+
+        return catalogue;
     }
 
     /* --------------------------------- Queries -------------------------------- */
