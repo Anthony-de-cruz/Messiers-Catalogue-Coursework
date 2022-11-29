@@ -1,8 +1,14 @@
+package src.tests;
+
+import src.MessierProgram.InvalidEntryException;
+import src.MessierProgram.MessierCatalogue;
+import src.MessierProgram.MessierObject;
+
 public class TestHarness {
 
     /* ---------------------------------- Tests --------------------------------- */
-    // Should use a test framework but thats out of the scope of the project.
-    // This testing is NOT 100% thorough.
+    // Should use a test framework but thats out of the scope of the project and
+    // target environment.
 
     public static boolean test1() {
 

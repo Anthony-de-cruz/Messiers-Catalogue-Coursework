@@ -1,3 +1,5 @@
+package src.MessierProgram;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -5,7 +7,6 @@ import java.util.List;
 import java.util.NoSuchElementException;
 
 /** To do list
- * - Make getters and setters
  * - Create test case
  */
 

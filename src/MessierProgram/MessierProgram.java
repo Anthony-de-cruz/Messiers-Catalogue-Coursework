@@ -1,3 +1,7 @@
+package src.MessierProgram;
+
+import src.tests.TestHarness;
+
 /**
  * @author Anthony de Cruz
  */

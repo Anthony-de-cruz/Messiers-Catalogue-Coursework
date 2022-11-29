@@ -1,3 +1,5 @@
+package src.MessierProgram;
+
 public class IOHandler {
 
     private String path;
