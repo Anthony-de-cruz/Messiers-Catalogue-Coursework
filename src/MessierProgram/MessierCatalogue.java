@@ -105,8 +105,14 @@ public class MessierCatalogue {
 
         String catalogue = "";
 
-        for (MessierObject object : this.messierObjects) {
-            catalogue += "\n" + object.toString();
+        for (int i = 0; i < size(); i++) {
+
+            if (i != 0) {
+                catalogue += "\n" + this.messierObjects.get(i).toString();
+
+            } else {
+                catalogue += this.messierObjects.get(i).toString();
+            }
         }
 
         return catalogue;
