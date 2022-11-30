@@ -23,7 +23,7 @@ public class MessierObject implements Comparable<MessierObject> {
 
     /**
      * todo eeeee
-     * Make setters with regex validation for dec and asc
+     * Make setters with regex validation for dec and asc and distanceRange
      */
 
     /**
@@ -40,12 +40,12 @@ public class MessierObject implements Comparable<MessierObject> {
             setMessierNumber(values[0]);
             setNgcicNumber(values[1]);
             setCommonNames(values[2]);
-            this.type = values[3];
-
-            this.constellation = values[5];
-            this.apparentMagnitude = Double.parseDouble(values[6]);
-            this.rightAscension = rightAscensionToRadians(values[7]);
-            this.declination = declinationToRadians(values[8]);
+            setType(values[3]);
+            setDistanceRange(values[4]);
+            setConstellation(values[5]);
+            setApparentMagnitude(Double.parseDouble(values[6]));
+            setRightAscensionTime(values[7]);
+            setDeclinationAngle(values[8]);
 
         } catch (InvalidEntryException exception) {
             throw exception;
@@ -67,17 +67,30 @@ public class MessierObject implements Comparable<MessierObject> {
      */
     public MessierObject(String messierNumber, String ngcicNumber, List<String> commonNames, String type,
             Double[] distanceRange,
-            String constellation, double apparentMagnitude, double rightAscension, double declination) {
+            String constellation, double apparentMagnitude, double rightAscension, double declination) throws InvalidEntryException {
 
-        this.messierNumber = messierNumber;
-        this.ngcicNumber = ngcicNumber;
-        this.commonNames = commonNames;
-        this.type = type;
-        this.distanceRange = distanceRange;
-        this.constellation = constellation;
-        this.apparentMagnitude = apparentMagnitude;
-        this.rightAscension = rightAscension;
-        this.declination = declination;
+        try {
+
+            setMessierNumber(messierNumber);
+            setNgcicNumber(ngcicNumber);
+            setCommonNames(commonNames);
+            setType(type);
+            this.distanceRange = distanceRange;
+            this.constellation = constellation;
+            this.apparentMagnitude = apparentMagnitude;
+            this.rightAscension = rightAscension;
+            this.declination = declination;
+
+            // setDistanceRange(distanceRange);
+            // setConstellation(values[5]);
+            // setApparentMagnitude(Double.parseDouble(values[6]));
+            // setRightAscensionTime(values[7]);
+            // setDeclinationAngle(values[8]);
+
+        } catch (InvalidEntryException exception) {
+            throw exception;
+        }
+        
     }
 
     /**
@@ -261,13 +274,13 @@ public class MessierObject implements Comparable<MessierObject> {
     /**
      * Set Messier Number. Must conform to "M1234".
      * 
-     * @apiNote Checked against regex:^M[1-9]+$
+     * @apiNote Checked against regex:^M[0-9]+$
      * 
      * @param messierNumber The Messier Number string
      * @throws InvalidEntryException thrown if it doesn't conform
      */
     public void setMessierNumber(String messierNumber) throws InvalidEntryException {
-        Pattern pattern = Pattern.compile("^M[1-9]+$");
+        Pattern pattern = Pattern.compile("^M[0-9]+$");
 
         if (pattern.matcher(messierNumber).find()) {
             this.messierNumber = messierNumber;
@@ -285,13 +298,13 @@ public class MessierObject implements Comparable<MessierObject> {
     /**
      * Set NGC/IC Number. Must conform to "{NGC | IC} 1234".
      * 
-     * @apiNote Checked against regex:^\"((NGC )|(IC ))[1-9]+\"$
+     * @apiNote Checked against regex:^\"(((NGC )|(IC ))[0-9]+)|-\"$
      * 
      * @param ngcicNumber The NGC/IC Number string
      * @throws InvalidEntryException thrown if it doesn't conform
      */
     public void setNgcicNumber(String ngcicNumber) throws InvalidEntryException {
-        Pattern pattern = Pattern.compile("^\"((NGC )|(IC ))[1-9]+\"$");
+        Pattern pattern = Pattern.compile("^\"(((NGC )|(IC ))[0-9]+)|-\"$");
 
         if (pattern.matcher(ngcicNumber).find()) {
             this.ngcicNumber = ngcicNumber;
@@ -352,16 +365,17 @@ public class MessierObject implements Comparable<MessierObject> {
      * @throws InvalidEntryException
      */
     public void setCommonNames(String field) throws InvalidEntryException {
-        Pattern pattern = Pattern.compile("^\".+$\"");
+        Pattern pattern = Pattern.compile("^\".+\"$");
 
         if (pattern.matcher(field).find()) {
+            field = field.replace("\"", "\u0000");
             String[] values = field.split("( or )|(, or )|,");
 
             for (int i = 0; i < values.length; i++) {
                 values[i] = values[i].trim();
             }
 
-            this.commonNames = Arrays.asList(values[2]);
+            this.commonNames = Arrays.asList(values);
 
         } else {
             throw new InvalidEntryException(
@@ -395,7 +409,7 @@ public class MessierObject implements Comparable<MessierObject> {
     }
 
     public String distanceRangeToString() {
-        if (this.distanceRange[0] == this.distanceRange[1]) {
+        if (this.distanceRange[0].equals(this.distanceRange[1])) {
             return this.distanceRange[0].toString();
 
         } else {
@@ -430,6 +444,8 @@ public class MessierObject implements Comparable<MessierObject> {
             this.distanceRange[1] = Double.parseDouble(distances[1]);
 
         } else if (patternSingle.matcher(field).find()) {
+
+            this.distanceRange = new Double[] {Double.parseDouble(field), Double.parseDouble(field)};
 
         } else {
             throw new InvalidEntryException("Invalid distance range. Must conform to " + patternRange.toString() + " | "
