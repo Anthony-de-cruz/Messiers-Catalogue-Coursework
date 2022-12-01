@@ -168,18 +168,12 @@ public class MessierProgram {
 
         System.out.println("\n--------------------------------- Query E --------------------------------\n");
 
-
-
-        MessierObject M42 = catalogue.getByMessierNumber("M42");
-        MessierObject M43 = catalogue.getByMessierNumber("M43");
-
-        System.out.println(M42.calcAngularDistance(M43));
-        System.out.println("    " + Math.toDegrees(M42.calcAngularDistance(M43)));
-
         MessierObject M45 = catalogue.getByMessierNumber("M45");
 
         MessierObject closestObject = catalogue.getClosest(M45);
-        System.out.println(M45.calcAngularDistance(closestObject));
-        System.out.println(Math.toDegrees(M45.calcAngularDistance(closestObject)));
+        System.out.println(M45);
+        System.out.println(closestObject);
+        System.out.println("\n" + closestObject.getMessierNumber() + " is "
+                + Math.toDegrees(M45.calcAngularDistance(closestObject)) + "° away from M45");
     }
 }
