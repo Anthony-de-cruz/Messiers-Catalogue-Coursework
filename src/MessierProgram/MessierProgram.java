@@ -12,7 +12,6 @@ public class MessierProgram {
 
     public static void main(String[] args) {
 
-        
         runTests();
 
         String path = "messier.txt";
@@ -28,7 +27,7 @@ public class MessierProgram {
     public static MessierCatalogue fetchData(String path) throws InvalidEntryException, IOException {
 
         MessierCatalogue catalogue = new MessierCatalogue();
-        
+
         try {
             IOHandler ioHandler = new IOHandler(path);
 
@@ -63,7 +62,7 @@ public class MessierProgram {
 
             if (exception instanceof InvalidEntryException) {
                 System.out.println("\nFatal error: " + path + " contains invalid data entry.");
-    
+
             } else {
                 System.out.println("\nFatal error: Failed to read: " + path);
             }
@@ -104,6 +103,16 @@ public class MessierProgram {
 
         System.out.println("\n--------------------------------- Query B --------------------------------\n");
 
+        MessierCatalogue openClusters = catalogue.getByType("Open cluster");
+
+        double avgApparentMagnitude = 0.0;
+
+        for (MessierObject object : openClusters.getList()) {
+            avgApparentMagnitude += object.getApparentMagnitude();
+        }
+
+        System.out.println(
+                "Average apparent magnitude of open clusters: " + (avgApparentMagnitude /= openClusters.size()));
     }
 
     /**
@@ -113,16 +122,39 @@ public class MessierProgram {
 
         System.out.println("\n--------------------------------- Query C --------------------------------\n");
 
+        MessierCatalogue globularClusters = catalogue.getByType("Globular cluster");
+
+        MessierObject mostDistantObject = globularClusters.get(0);
+
+        for (MessierObject globularCluster : globularClusters.getList()) {
+            if (globularCluster.getLowestDistance() > mostDistantObject.getLowestDistance()) {
+                mostDistantObject = globularCluster;
+            }
+        }
+
+        System.out.println("Most distant globular cluster:\n" + mostDistantObject.toString());
     }
 
     /**
-     * Display the details of the object in the constellaon Sagittarius with the
+     * Display the details of the object in the constellation Sagittarius with the
      * lowest declination.
      */
     public static void queryD(MessierCatalogue catalogue) {
 
         System.out.println("\n--------------------------------- Query D --------------------------------\n");
 
+        MessierCatalogue sagittarius = catalogue.getByConstellation("Sagittarius");
+
+        MessierObject lowestObject = sagittarius.get(0);
+
+        for (int i = 1; i < sagittarius.size(); i++) {
+
+            if (sagittarius.get(i).getDeclinationRadians() < lowestObject.getDeclinationRadians()) {
+                lowestObject = sagittarius.get(i);
+            }
+        }
+
+        System.out.println("Object with the lowest declination within Sagittarius:\n" + lowestObject.toString());
     }
 
     /**
@@ -130,11 +162,24 @@ public class MessierProgram {
      * sense of having the smallest angular distance). Hint: test your code using
      * M42 (the Great Orion Nebula) as M42 and M43 (De Mairan’s Nebula) are both are
      * part of the Orion molecular cloud complex, and so they should have a small
-     * angular separaon (approximately 8 arc minutes)
+     * angular separation (approximately 8 arc minutes)
      */
     public static void queryE(MessierCatalogue catalogue) {
 
         System.out.println("\n--------------------------------- Query E --------------------------------\n");
 
+
+
+        MessierObject M42 = catalogue.getByMessierNumber("M42");
+        MessierObject M43 = catalogue.getByMessierNumber("M43");
+
+        System.out.println(M42.calcAngularDistance(M43));
+        System.out.println("    " + Math.toDegrees(M42.calcAngularDistance(M43)));
+
+        MessierObject M45 = catalogue.getByMessierNumber("M45");
+
+        MessierObject closestObject = catalogue.getClosest(M45);
+        System.out.println(M45.calcAngularDistance(closestObject));
+        System.out.println(Math.toDegrees(M45.calcAngularDistance(closestObject)));
     }
 }

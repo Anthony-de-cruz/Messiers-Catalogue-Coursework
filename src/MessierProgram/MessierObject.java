@@ -67,7 +67,8 @@ public class MessierObject implements Comparable<MessierObject> {
      */
     public MessierObject(String messierNumber, String ngcicNumber, List<String> commonNames, String type,
             Double[] distanceRange,
-            String constellation, double apparentMagnitude, double rightAscension, double declination) throws InvalidEntryException {
+            String constellation, double apparentMagnitude, double rightAscension, double declination)
+            throws InvalidEntryException {
 
         try {
 
@@ -90,7 +91,7 @@ public class MessierObject implements Comparable<MessierObject> {
         } catch (InvalidEntryException exception) {
             throw exception;
         }
-        
+
     }
 
     /**
@@ -248,6 +249,18 @@ public class MessierObject implements Comparable<MessierObject> {
         }
 
         return string;
+    }
+
+    /**
+     * 
+     * @param object
+     * @return
+     */
+    public double calcAngularDistance(MessierObject object) {
+
+        return Math.acos(((Math.sin(getDeclinationRadians()) * Math.sin(object.getDeclinationRadians()))
+                + (Math.cos(getDeclinationRadians()) * Math.cos(object.getDeclinationRadians())
+                        * (Math.cos(getRightAscensionRadians() - object.getRightAscensionRadians())))));
     }
 
     @Override
@@ -445,7 +458,7 @@ public class MessierObject implements Comparable<MessierObject> {
 
         } else if (patternSingle.matcher(field).find()) {
 
-            this.distanceRange = new Double[] {Double.parseDouble(field), Double.parseDouble(field)};
+            this.distanceRange = new Double[] { Double.parseDouble(field), Double.parseDouble(field) };
 
         } else {
             throw new InvalidEntryException("Invalid distance range. Must conform to " + patternRange.toString() + " | "

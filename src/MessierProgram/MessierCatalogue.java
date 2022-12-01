@@ -6,7 +6,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-/** To do list
+/**
+ * To do list
  * - Create test case
  */
 
@@ -94,7 +95,7 @@ public class MessierCatalogue {
         Collections.sort(this.messierObjects);
     }
 
-    /* ------------------------------ Getting Data ------------------------------ */
+    /* ---------------------------- Catalogue Queries --------------------------- */
 
     /**
      * Create a string containing the Messier Objects in the database format.
@@ -134,6 +135,91 @@ public class MessierCatalogue {
      */
     public boolean isEmpty() {
         return this.messierObjects.isEmpty();
+    }
+
+    public MessierObject getByMessierNumber(String messierNumber) {
+        
+        for (MessierObject object : this.messierObjects) {
+
+            if (object.getMessierNumber().equals(messierNumber)) {
+                return object;
+            }
+        }
+
+        throw new NoSuchElementException("Messier number: " + messierNumber + " does not exist.");
+    }
+
+    /**
+     * 
+     * @param type
+     * @return
+     */
+    public MessierCatalogue getByType(String type) {
+
+        MessierCatalogue objects = new MessierCatalogue();
+
+        for (MessierObject object : this.messierObjects) {
+
+            if (object.getType().equals(type)) {
+                objects.add(object);
+            }
+        }
+
+        return objects;
+    }
+
+    /**
+     * 
+     * @param constellation
+     * @return
+     */
+    public MessierCatalogue getByConstellation(String constellation) {
+
+        MessierCatalogue objects = new MessierCatalogue();
+
+        for (MessierObject object : this.messierObjects) {
+
+            if (object.getConstellation().equals(constellation)) {
+                objects.add(object);
+            }
+        }
+
+        return objects;
+    }
+
+    /**
+     * 
+     * @param object
+     * @return
+     */
+    public MessierObject getClosest(MessierObject object) {
+
+        if (isEmpty()) {
+            return null;
+        }
+
+        MessierObject closestObject = get(0);
+        double shortestAngularDistance = Double.POSITIVE_INFINITY;
+
+        for (MessierObject objects : this.messierObjects) {
+
+            double angularDistance = object.calcAngularDistance(objects);
+
+            if (angularDistance != 0 && angularDistance < shortestAngularDistance) {
+                shortestAngularDistance = angularDistance;
+                closestObject = objects;
+            }
+        }
+        return closestObject;
+    }
+
+    /**
+     * 
+     * @param index
+     * @return
+     */
+    public MessierObject get(int index) {
+        return this.messierObjects.get(index);
     }
 
     /* --------------------------- Getters and Setters -------------------------- */
