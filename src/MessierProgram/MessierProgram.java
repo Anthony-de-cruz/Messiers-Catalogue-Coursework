@@ -24,7 +24,7 @@ public class MessierProgram {
      * 
      * @return The Messier Object Catalogue
      */
-    public static MessierCatalogue fetchData(String path) throws InvalidEntryException, IOException {
+    public static MessierCatalogue fetchData(String path) {
 
         MessierCatalogue catalogue = new MessierCatalogue();
 
@@ -36,26 +36,6 @@ public class MessierProgram {
             for (String entry : entries) {
                 catalogue.add(new MessierObject(entry));
             }
-
-        } catch (InvalidEntryException | IOException exception) {
-            throw exception;
-        }
-
-        return catalogue;
-    }
-
-    public static void runQueries(String path) {
-
-        MessierCatalogue catalogue;
-
-        try {
-            catalogue = fetchData(path);
-
-            queryA(catalogue);
-            queryB(catalogue);
-            queryC(catalogue);
-            queryD(catalogue);
-            queryE(catalogue);
 
         } catch (InvalidEntryException | IOException exception) {
             exception.printStackTrace();
@@ -70,15 +50,28 @@ public class MessierProgram {
             System.exit(0);
         }
 
+        return catalogue;
+    }
+
+    public static void runQueries(String path) {
+
+        MessierCatalogue catalogue = fetchData(path);
+
+        queryA(catalogue);
+        queryB(catalogue);
+        queryC(catalogue);
+        queryD(catalogue);
+        queryE(catalogue);
+
     }
 
     public static void runTests() {
 
         if (TestHarness.runTests()) {
-            System.out.println("<-- All tests passed -->");
+            System.out.println("\n<-- All tests passed :) -->");
 
         } else {
-            System.out.println("<-- Some tests failed -->");
+            System.out.println("\n<-- Some tests failed :( -->");
             System.exit(0);
         }
     }
