@@ -22,11 +22,6 @@ public class MessierObject implements Comparable<MessierObject> {
     private static int fieldCount = 9;
 
     /**
-     * todo eeeee
-     * Make setters with regex validation for dec and asc and distanceRange
-     */
-
-    /**
      * Constructor with table entry string.
      * 
      * @param entry Table entry string
@@ -53,7 +48,7 @@ public class MessierObject implements Comparable<MessierObject> {
     }
 
     /**
-     * Constructor with all values fields.
+     * Constructor with all value fields.
      * 
      * @param messierNumber
      * @param ngcicNumber
@@ -61,9 +56,10 @@ public class MessierObject implements Comparable<MessierObject> {
      * @param type
      * @param distance
      * @param constellation
-     * @param apparentMagnitude Stored as radians
-     * @param rightAscension    Stored as radians
-     * @param declination
+     * @param apparentMagnitude
+     * @param rightAscension    In radians
+     * @param declination       In radians
+     * @throws InvalidEntryException Thrown if any values fail validation
      */
     public MessierObject(String messierNumber, String ngcicNumber, List<String> commonNames, String type,
             Double[] distanceRange,
@@ -71,27 +67,19 @@ public class MessierObject implements Comparable<MessierObject> {
             throws InvalidEntryException {
 
         try {
-
             setMessierNumber(messierNumber);
             setNgcicNumber(ngcicNumber);
             setCommonNames(commonNames);
             setType(type);
-            this.distanceRange = distanceRange;
-            this.constellation = constellation;
-            this.apparentMagnitude = apparentMagnitude;
-            this.rightAscension = rightAscension;
-            this.declination = declination;
-
-            // setDistanceRange(distanceRange);
-            // setConstellation(values[5]);
-            // setApparentMagnitude(Double.parseDouble(values[6]));
-            // setRightAscensionTime(values[7]);
-            // setDeclinationAngle(values[8]);
+            setDistanceRange(distanceRange);
+            setConstellation(constellation);
+            setApparentMagnitude(apparentMagnitude);
+            setRightAscensionRadians(rightAscension);
+            setDeclinationRadians(declination);
 
         } catch (InvalidEntryException exception) {
             throw exception;
         }
-
     }
 
     /**
@@ -228,7 +216,7 @@ public class MessierObject implements Comparable<MessierObject> {
      * Creates and returns a string of all of the objects fields in the database
      * format.
      * 
-     * @return The object as a string.
+     * @return The object as a string
      */
     public String toString() {
 
@@ -252,12 +240,16 @@ public class MessierObject implements Comparable<MessierObject> {
     }
 
     /**
+     * Calculate the angular distance between this object and the passed one.
      * 
-     * @param object
-     * @return
+     * @param object The messier object you want to get the distance to
+     * @return The angular distance in radians
      */
     public double calcAngularDistance(MessierObject object) {
 
+        // Formula: cos(θ) = sin(δ1) * sin(δ2) + cos(δ1) * cos(δ2) * cos(α1 - α2)
+        // δ == Declination
+        // α == Right ascension
         return Math.acos(((Math.sin(getDeclinationRadians()) * Math.sin(object.getDeclinationRadians()))
                 + (Math.cos(getDeclinationRadians()) * Math.cos(object.getDeclinationRadians())
                         * (Math.cos(getRightAscensionRadians() - object.getRightAscensionRadians())))));
@@ -421,6 +413,11 @@ public class MessierObject implements Comparable<MessierObject> {
         return this.distanceRange[1];
     }
 
+    /**
+     * Returns the distance range as a string in the form "{shortest}-{longest}".
+     * 
+     * @return The string
+     */
     public String distanceRangeToString() {
         if (this.distanceRange[0].equals(this.distanceRange[1])) {
             return this.distanceRange[0].toString();
@@ -432,6 +429,22 @@ public class MessierObject implements Comparable<MessierObject> {
 
     public void setDistanceRange(double lowestDistance, double highestDistance) {
         this.distanceRange = new Double[] { lowestDistance, highestDistance };
+    }
+
+    /**
+     * Set distance range in the form [shortest, longest].
+     * 
+     * @param distanceRange The array containing the distances
+     * @throws InvalidEntryException Thrown if passed array is not 2 elements in
+     *                               length
+     */
+    public void setDistanceRange(Double[] distanceRange) throws InvalidEntryException {
+        if (distanceRange.length != 2) {
+            throw new InvalidEntryException(
+                    "Expected distanceRange[] array to be 2 elements, got: " + distanceRange.length + ".");
+        } else {
+            this.distanceRange = distanceRange;
+        }
     }
 
     /**
@@ -479,8 +492,19 @@ public class MessierObject implements Comparable<MessierObject> {
         return this.apparentMagnitude;
     }
 
-    public void setApparentMagnitude(double apparentMagnitude) {
-        // Just a double, no real validation required.
+    /**
+     * Set the apparent magnitude.
+     * 
+     * @param apparentMagnitude The apparent magnitude
+     * @throws InvalidEntryException Thrown if the passed value is less than or
+     *                               equal to zero
+     */
+    public void setApparentMagnitude(double apparentMagnitude) throws InvalidEntryException {
+
+        if (apparentMagnitude <= 0) {
+            throw new InvalidEntryException(
+                    "Apparent magnitudes cannot be less than or equal to zero, got: " + apparentMagnitude + ".");
+        }
         this.apparentMagnitude = apparentMagnitude;
     }
 
@@ -497,9 +521,16 @@ public class MessierObject implements Comparable<MessierObject> {
         this.rightAscension = raAsRadian;
     }
 
-    public void setRightAscensionTime(String field) {
-        // Input validation
-        this.rightAscension = rightAscensionToRadians(field);
+    public void setRightAscensionTime(String field) throws InvalidEntryException {
+        Pattern pattern = Pattern.compile("^[0-9]+h [0-9]+m [0-9]+.[0-9]{4}s$");
+
+        if (pattern.matcher(field).find()) {
+            this.rightAscension = rightAscensionToRadians(field);
+        } else {
+            throw new InvalidEntryException(
+                    "Invalid Right Ascension. Must conform to " + pattern.toString() + ", got: " + field);
+        }
+
     }
 
     public double getDeclinationRadians() {
@@ -515,8 +546,16 @@ public class MessierObject implements Comparable<MessierObject> {
         this.declination = decAsRadian;
     }
 
-    public void setDeclinationAngle(String field) {
-        // Input validation
-        this.declination = declinationToRadians(field);
+    public void setDeclinationAngle(String field) throws InvalidEntryException {
+        Pattern pattern = Pattern.compile("^[-0-9]+° [0-9]+\' [0-9]+.[0-9]{4}\"$");
+
+        if (pattern.matcher(field).find()) {
+            this.declination = declinationToRadians(field);
+
+        } else {
+            throw new InvalidEntryException(
+                    "Invalid Declination. Must conform to " + pattern.toString() + ", got: " + field);
+        }
+
     }
 }
