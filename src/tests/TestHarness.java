@@ -3,16 +3,11 @@ package src.tests;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import src.MessierProgram.IOHandler;
 import src.MessierProgram.InvalidEntryException;
 import src.MessierProgram.MessierCatalogue;
 import src.MessierProgram.MessierObject;
-
-//todo
-// Complete messierObject tests
-// Complete Messiercatalogue tests
 
 public class TestHarness {
 
@@ -23,10 +18,10 @@ public class TestHarness {
     /**
      * Testing MessierObject.
      * 
-     * @param validStringData A valid set of messier object entries
-     * @param validMappedData A valid set of messier fields
+     * @param validStringData   A valid set of messier object entries
+     * @param validMappedData   A valid set of messier fields
      * @param invalidStringData An invalid set of messier object entries
-     * @param validMappedData An invalid set of messier fields
+     * @param validMappedData   An invalid set of messier fields
      * @return Test result
      */
     public static boolean testMessierObject(String[] validStringData, HashMap<String, String> validMappedData,
@@ -75,63 +70,6 @@ public class TestHarness {
             }
         }
 
-        /* ---------------------- Test the rest of the Methods ---------------------- */
-
-        // Valid test data
-        try {
-            MessierObject obj = new MessierObject(validMappedData.get("field"));
-
-            if (!obj.getMessierNumber().equals(validMappedData.get("messierNumber"))) {
-                System.err.println("Valid case:");
-                System.err.println(validMappedData.get("field"));
-                System.err.println("FAILED");
-                System.err.println(obj.getMessierNumber() + " is not " + validMappedData.get("messierNumber"));
-                return false;
-            }
-
-            if (!obj.getNgcicNumber().equals(validMappedData.get("ngcicNumber"))) {
-                System.err.println("Valid case:");
-                System.err.println(validMappedData.get("field"));
-                System.err.println("FAILED");
-                System.err.println(obj.getNgcicNumber() + " is not " + validMappedData.get("ngcicNumber"));
-                return false;
-            }
-
-            List<String> commonNames = new ArrayList<String>();
-            commonNames.add(validMappedData.get("commonNames"));
-            if (!obj.getCommonNames().equals(commonNames)) {
-                System.err.println("Valid case:");
-                System.err.println(validMappedData.get("field"));
-                System.err.println("FAILED");
-                System.err.println(obj.getCommonNames() + " is not " + commonNames.toString());
-                return false;
-            }
-
-            if (!obj.getType().equals(validMappedData.get("type"))) {
-                System.err.println("Valid case:");
-                System.err.println(validMappedData.get("field"));
-                System.err.println("FAILED");
-                System.err.println(obj.getType() + " is not " + validMappedData.get("type"));
-                return false;
-            }
-
-            Double[] distanceRange = {33.0, 33.0};
-            if (!obj.getDistanceRange().equals(distanceRange)) {
-                System.err.println("Valid case:");
-                System.err.println(validMappedData.get("field"));
-                System.err.println("FAILED");
-                System.err.println("" + obj.getDistanceRange()[0] + obj.getDistanceRange()[1] + " is not " + distanceRange[0] + distanceRange[1]);
-                return false;
-            }
-
-        } catch (InvalidEntryException exception) {
-            exception.printStackTrace();
-            System.err.println("Valid case:");
-            System.err.println(validMappedData.get("field"));
-            System.err.println("FAILED");
-            return false;
-        }
-
         System.err.println(" -- testMessierObject: PASSED -- \n");
         return true;
     }
@@ -139,12 +77,12 @@ public class TestHarness {
     /**
      * Testing MessierCatalogue.
      * 
-     * @param validStringData A valid set of messier object entries
+     * @param validStringData   A valid set of messier object entries
      * @param invalidStringData An invalid set of messier object entries
      * @return Test result
      */
     public static boolean testMessierCatalogue(String[] validStringData, String[] invalidStringData) {
-    
+
         MessierObject[] validObjects = new MessierObject[validStringData.length];
 
         for (int i = 0; i < validStringData.length; i++) {
@@ -159,13 +97,12 @@ public class TestHarness {
             }
         }
 
-        // Test valid
         for (int i = 0; i < 1; i++) {
 
             try {
                 MessierCatalogue catalogue = new MessierCatalogue(validObjects);
                 catalogue.sort();
-                
+
                 System.err.println("Valid case " + i + ": PASSED");
 
             } catch (Exception exception) {
@@ -182,7 +119,7 @@ public class TestHarness {
     /**
      * Testing IOHandler.
      * 
-     * @param validPath A valid file path
+     * @param validPath   A valid file path
      * @param invalidPath An invalid file path
      * @return Test result
      */
@@ -210,7 +147,7 @@ public class TestHarness {
                 return false;
 
             } else {
-                System.err.println("Valid case " + validPath +": FAILED: Failed to read.");
+                System.err.println("Valid case " + validPath + ": FAILED: Failed to read.");
                 return false;
             }
         }
@@ -224,8 +161,8 @@ public class TestHarness {
             System.err.println("Invalid case " + invalidPath + ": FAILED: Read and fetch was successful.");
             return false;
 
-            } catch (InvalidEntryException | IOException exception) {
-                System.err.println("Invalid case: PASSED");
+        } catch (InvalidEntryException | IOException exception) {
+            System.err.println("Invalid case: PASSED");
         }
 
         System.err.println(" -- testIOHandler: PASSED -- \n");
