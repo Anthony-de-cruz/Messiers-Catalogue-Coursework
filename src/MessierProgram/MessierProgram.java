@@ -62,7 +62,6 @@ public class MessierProgram {
         queryC(catalogue);
         queryD(catalogue);
         queryE(catalogue);
-
     }
 
     public static void runTests() {

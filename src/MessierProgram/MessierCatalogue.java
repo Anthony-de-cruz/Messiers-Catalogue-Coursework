@@ -6,11 +6,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-/**
- * To do list
- * - Create test case
- */
-
 public class MessierCatalogue {
 
     private List<MessierObject> messierObjects;
@@ -38,7 +33,7 @@ public class MessierCatalogue {
     /**
      * Add an object to the set.
      * 
-     * @param messierObject
+     * @param messierObject The Messier Object
      */
     public void add(MessierObject messierObject) {
         this.messierObjects.add(messierObject);
@@ -138,7 +133,7 @@ public class MessierCatalogue {
     }
 
     public MessierObject getByMessierNumber(String messierNumber) {
-        
+
         for (MessierObject object : this.messierObjects) {
 
             if (object.getMessierNumber().equals(messierNumber)) {
@@ -150,9 +145,10 @@ public class MessierCatalogue {
     }
 
     /**
+     * Get a catalogue of all Messier Objects that are of the passed type.
      * 
-     * @param type
-     * @return
+     * @param type The type
+     * @return A Messier Catalogue containing all of the objects
      */
     public MessierCatalogue getByType(String type) {
 
@@ -169,9 +165,10 @@ public class MessierCatalogue {
     }
 
     /**
+     * Get a catalogue of all Messier Objects that are in the passed constellation
      * 
-     * @param constellation
-     * @return
+     * @param constellation The constellation
+     * @return A Messier Catalogue containing all of the objects
      */
     public MessierCatalogue getByConstellation(String constellation) {
 
@@ -188,9 +185,11 @@ public class MessierCatalogue {
     }
 
     /**
+     * Return the Messier Object that has the lowest angular distance to the passed
+     * Messier Object
      * 
-     * @param object
-     * @return
+     * @param object The object to be compared to
+     * @return The object that is closest
      */
     public MessierObject getClosest(MessierObject object) {
 
@@ -214,9 +213,10 @@ public class MessierCatalogue {
     }
 
     /**
+     * Return the Messier Object at the given index
      * 
-     * @param index
-     * @return
+     * @param index The index
+     * @return The Messier Object
      */
     public MessierObject get(int index) {
         return this.messierObjects.get(index);
